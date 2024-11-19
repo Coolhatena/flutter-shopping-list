@@ -19,6 +19,8 @@ class GroceryListScreen extends StatefulWidget {
 class _GroceryListScreenState extends State<GroceryListScreen> {
   List<GroceryItem> _groceryItems = [];
 
+  var _isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +54,7 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
 
     setState(() {
       _groceryItems = loadedItems;
+      _isLoading = false;
     });
   }
 
@@ -94,33 +97,41 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = const Center(
+      child: Text(
+        'No groceries added. Start adding some!',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+
+    if (_isLoading) {
+      content = const Center(child: CircularProgressIndicator());
+    }
+
+    if (_groceryItems.isNotEmpty) {
+      content = ListView.builder(
+        itemCount: _groceryItems.length,
+        itemBuilder: (ctx, index) => Dismissible(
+          key: ValueKey(_groceryItems[index].id),
+          onDismissed: (direction) {
+            _removeItem(_groceryItems[index]);
+          },
+          child: GroceryListItem(
+            color: _groceryItems[index].category.color,
+            name: _groceryItems[index].name,
+            quantity: _groceryItems[index].quantity,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Groceries'),
         actions: [IconButton(onPressed: _addItem, icon: const Icon(Icons.add))],
       ),
       // TODO: Separate the body code in individual widgets to improve readability
-      body: _groceryItems.isEmpty
-          ? const Center(
-              child: Text(
-                'No groceries added. Start adding some!',
-                style: TextStyle(fontSize: 16),
-              ),
-            )
-          : ListView.builder(
-              itemCount: _groceryItems.length,
-              itemBuilder: (ctx, index) => Dismissible(
-                key: ValueKey(_groceryItems[index].id),
-                onDismissed: (direction) {
-                  _removeItem(_groceryItems[index]);
-                },
-                child: GroceryListItem(
-                  color: _groceryItems[index].category.color,
-                  name: _groceryItems[index].name,
-                  quantity: _groceryItems[index].quantity,
-                ),
-              ),
-            ),
+      body: content,
     );
   }
 }
