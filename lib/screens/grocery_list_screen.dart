@@ -17,7 +17,6 @@ class GroceryListScreen extends StatefulWidget {
 }
 
 class _GroceryListScreenState extends State<GroceryListScreen> {
-  List<GroceryItem> _groceryItems = [];
   late Future<List<GroceryItem>> _loadedItems;
 
   @override
@@ -33,7 +32,6 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
     );
 
     final response = await http.get(url);
-    // print(response.statusCode);
 
     if (response.statusCode >= 400) {
       throw Exception('Failed to fetch grocery items. Please try again later.');
@@ -60,10 +58,6 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
       ));
     }
 
-    // setState(() {
-    //   _groceryItems = loadedItems;
-    //   _isLoading = false;
-    // });
     return loadedItems;
   }
 
@@ -84,8 +78,6 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   void _removeItem(GroceryItem item) async {
-    final itemIndex = _groceryItems.indexOf(item);
-
     final url = Uri.https(
       'flutter-shopping-list-d8e96-default-rtdb.firebaseio.com',
       'shopping-list/${item.id}.json',
@@ -117,7 +109,6 @@ class _GroceryListScreenState extends State<GroceryListScreen> {
         title: const Text('Your Groceries'),
         actions: [IconButton(onPressed: _addItem, icon: const Icon(Icons.add))],
       ),
-      // TODO: Separate the body code in individual widgets to improve readability
       body: FutureBuilder(
         future: _loadedItems,
         builder: (context, snapshot) {
